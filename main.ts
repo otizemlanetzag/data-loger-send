@@ -2,51 +2,45 @@
 namespace SmartLogger {
 
     /**
-     * רושם נתונים לאוגר הפנימי ושולח אותם אוטומטית ברדיו כטקסט
+     * רושם את כל העמודות לאחסון הפנימי ושולח אותן כהודעה אחת ברדיו
      */
     //% block="רשום נתונים $data"
     //% data.shadow="lists_create_with"
     //% data.defl="smart_log_create_cv"
-    export function logWithRadio(data: datalogger.ColumnValue[]): void {
-        // 1. רישום לאוגר הפנימי (עבור קובץ ה-HTM בסייר הקבצים)
-        datalogger.logData(data)
+    export function logAndRadio(data: any[]): void {
+        // 1. רישום לאוגר הפנימי (עבור קובץ ה-HTM)
+        const dl = (datalogger as any);
+        dl.logData(data);
 
-        // 2. בניית הודעת טקסט ושליחה ברדיו (למשל "temp:25,light:100")
-        let msg = ""
-        for (let cv of data) {
-            msg += cv.column + ":" + cv.value + ","
+        // 2. בניית מחרוזת אחת מכל העמודות ושליחה ברדיו
+        let message = "";
+        for (let item of data) {
+            let column = (item as any).column;
+            let value = (item as any).value;
+            message += column + ":" + value + " ";
         }
-        if (msg.length > 0) {
-            radio.sendString(msg.substr(0, msg.length - 1))
+
+        if (message.length > 0) {
+            radio.sendString(message.trim());
         }
     }
 
     /**
-     * יצירת זוג עמודה וערך (הבלוק שמתחבר לתוך ה-Log)
+     * יוצר זוג של עמודה וערך (הבלוק שמתחבר לתוך הרשימה)
      */
     //% block="עמודה $column ערך $value"
     //% blockId=smart_log_create_cv
     //% blockHidden=false
     //% value.shadow=math_number
-    export function createCV(column: string, value: any): datalogger.ColumnValue {
-        return datalogger.createCV(column, value)
+    export function createCV(column: string, value: any): any {
+        return (datalogger as any).createCV(column, value);
     }
 
     /**
-     * מחיקת האוגר (כמו הבלוק המקורי)
+     * מחיקת כל הנתונים מהזיכרון
      */
-    //% block="מחק נתונים $delType"
-    //% delType.defl=datalogger.DeleteType.Full
-    export function deleteLog(delType: datalogger.DeleteType): void {
-        datalogger.deleteLog(delType)
-    }
-
-    /**
-     * הגדרת חותמת זמן (כמו הבלוק המקורי)
-     */
-    //% block="הגדר חותמת זמן $format"
-    export function setTimestamp(format: datalogger.TimeFormat): void {
-        datalogger.setTimestamp(format)
+    //% block="מחיקת כל הנתונים"
+    export function clearAll(): void {
+        (datalogger as any).deleteLog();
     }
 }
-
