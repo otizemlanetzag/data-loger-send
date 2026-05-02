@@ -1,46 +1,59 @@
 /**
- * שלוחה מותאמת אישית לאגירת נתונים - micro:bit V2
+ * שלוחת אוגר נתונים חכם - הכל ביחידה אחת
  */
-//% color=#2c3e50 icon="\uf0ce" block="אוגר נתונים"
-namespace MyDataLogger {
+//% color=#2c3e50 icon="\uf0ce" block="אוגר נתונים מאוחד"
+namespace SmartLogger {
 
     /**
-     * אגירת נתונים באחסון הפנימי של המיקרוביט (קובץ MY_DATA)
+     * רושם נתונים לאחסון הפנימי, שולח אותם ל-Serial (לאחסון חיצוני) ומשדר ברדיו
      */
-    //% block="שמור נתון באחסון פנימי %data"
-    export function logInternal(data: string): void {
-        datalogger.log(datalogger.createCV("data", data))
-    }
+    //% block="רשום ושלח נתונים: מפתח %key ערך %value || קבוצת רדיו %group"
+    //% group.defl=1
+    export function logEverything(key: string, value: string, group: number = 1): void {
+        // 1. שמירה באחסון פנימי (קובץ MY_DATA)
+        datalogger.log(datalogger.createCV(key, value))
 
-    /**
-     * שליחת הנתון דרך הרדיו
-     */
-    //% block="שלח נתון %data ברדיו בקבוצה %group"
-    export function sendViaRadio(data: string, group: number): void {
+        // 2. שליחה ל-Serial (עבור רכיב SD חיצוני או מחשב)
+        serial.writeLine(key + ":" + value)
+
+        // 3. שידור ברדיו
         radio.setGroup(group)
-        radio.sendString(data)
+        radio.sendString(key + ":" + value)
+
+        // אישור ויזואלי קטן על המסך
+        led.plot(0, 0)
+        basic.pause(100)
+        led.unplot(0, 0)
     }
 
     /**
-     * אגירת נתונים באחסון חיצוני (Serial/SD)
+     * בלוק עבור המיקרוביט המקבל: מאזין לרדיו ושומר הכל אוטומטית
      */
-    //% block="שמור נתון %data באחסון חיצוני"
-    export function logExternal(data: string): void {
-        serial.writeLine(data)
+    //% block="הפעל האזנה ואגירה אוטומטית מרדיו בקבוצה %group"
+    export function startListening(group: number): void {
+        radio.setGroup(group)
+        radio.onReceivedString(function (receivedString) {
+            // פירוק הנתון (מפתח:ערך) ושמירה
+            datalogger.log(datalogger.createCV("Received", receivedString))
+            basic.showIcon(IconNames.SmallDiamond, 100)
+            basic.clearScreen()
+        })
     }
 
     /**
-     * הצגת נתון על המסך
+     * הצגת נתון אחרון על המסך (גלילה)
      */
-    //% block="הצג נתון על המסך %data"
-    export function displayData(data: string): void {
-        basic.showString(data)
+    //% block="הצג טקסט %text על המסך"
+    export function display(text: string): void {
+        basic.showString(text)
     }
 
     /**
-     * מחיקת כל הנתונים מהזיכרון הפנימי
+     * מחיקה סופית של כל הנתונים שנאגרו בזיכרון
      */
-    //% block="מחק את כל הנתונים שנאגרו"
-    export function deleteLogs(): void {
+    //% block="מחק את כל המידע שנאגר"
+    export function clearStorage(): void {
         datalogger.deleteLog(datalogger.DeleteType.Full)
+        basic.showIcon(IconNames.No)
     }
+}
