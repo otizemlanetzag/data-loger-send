@@ -1,5 +1,5 @@
 {
-    "name": "DATA LOGER SEND",
+    "name": "DATA LOGER SEND - Copy",
     "description": "",
     "dependencies": {
         "core": "*",
@@ -10,8 +10,7 @@
         "main.blocks",
         "main.ts",
         "README.md",
-        "LOGGER.ts",
-        "SEND.ts"
+        "LOGGER.ts"
     ],
     "testFiles": [
         "test.ts"
