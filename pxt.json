@@ -1,16 +1,15 @@
 {
-    "name": "DATA LOGER SEND - Copy",
+    "name": "smart-logger",
+    "version": "0.0.0",
     "description": "",
     "dependencies": {
         "core": "*",
         "radio": "*",
-        "microphone": "*"
+        "datalogger": "*"
     },
     "files": [
-        "main.blocks",
         "main.ts",
-        "README.md",
-        "LOGGER.ts"
+        "README.md"
     ],
     "testFiles": [
         "test.ts"
@@ -21,6 +20,5 @@
     },
     "supportedTargets": [
         "microbit"
-    ],
-    "preferredEditor": "tsprj"
+    ]
 }
